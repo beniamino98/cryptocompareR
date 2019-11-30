@@ -9,6 +9,9 @@ format_date(x)
 \arguments{
 \item{x}{a date}
 }
+\value{
+data in character format %Y-%m-%d
+}
 \description{
 a function for formatting a date format %d-%m-%Y
 }

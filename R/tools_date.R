@@ -7,6 +7,10 @@
 #' @param milliseconds if:
 #'        - true          : conversion in milliseconds
 #'
+#'@name unix_date
+#'@rdname unix_date
+#'@return date converted from or to unix format / milliseconds
+#'
 #' @examples
 #'  unix_date("2019-11-22 19:20:05", from = FALSE)
 #'  unix_date( "2019-04-01" , from = FALSE, milliseconds = FALSE)
@@ -60,6 +64,9 @@ unix_date <- function(x, from = TRUE, milliseconds = FALSE) {
 #' @title format_date
 #' @description a function for formatting a date format %d-%m-%Y
 #' @param x a date
+#' @name format_date
+#' @rdname format_date
+#' @return data in character format %Y-%m-%d
 #' @examples
 #'
 #'  format_date("22-11-2019")

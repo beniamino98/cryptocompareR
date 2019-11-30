@@ -1,10 +1,10 @@
 Package: cryptocompareR
 Type: Package
-Title: Tidy Cryptocurrency Data Analysis 
+Title: Tidy Crypto Currency Importing
 Version: 0.1.0
 Author: Beniamino Sartini
-Maintainer: Beniamino Sartini <sartinibeniamino@gmail.com>
-Description: Analyize cryptocurrency market in a tidy way and importing data from cryptocompare Api.
+Maintainer: Beniamino Sartini <sartinibeniamino@gmail.com> 
+Description: Analyze crypto currency market in a tidy way and importing data from <https://www.cryptocompare.com>.
 Depends: 
     R (>= 3.2.0)
 Imports: 
@@ -20,9 +20,11 @@ Imports:
     rmarkdown,
     zoo
 License: GPL-2
+URL: https://github.com/beniamino98/cryptocompareR
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
-
+Suggests: 
+    testthat

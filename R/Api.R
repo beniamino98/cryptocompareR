@@ -10,48 +10,52 @@
 #' @param json logical. When TRUE the response will be converted from json, else is converted in the base form
 #'              with the function \code{\link[httr]{content}}
 
-
-
 Api  <- function(api = "blockchain", paths = NULL, query = NULL, config = list(), quiet = TRUE, json = FALSE  ) {
 
-  api.match <- NA_character_
-  base.url  <- NA_character_
-  response.get <- NA
-  response.content <- NA
+  api.match <- NULL
+  base.url  <- NULL
+  response.get <- NULL
+  response.content <- NULL
 
-
+  # supported base url
   api.supported <- list(
 
     blockchain    = "https://blockchain.info",
     etherscan     = "https://api.etherscan.io",
     bitnodes      = "https://bitnodes.earn.com",
     blockchair    = "https://api.blockchair.com",
-    cryptocompare = "https://min-api.cryptocompare.com"
+    cryptocompare = "https://min-api.cryptocompare.com",
+    coingenko     = "https://api.coingecko.com"
   )
 
   api.match <- match.arg(api , names(api.supported) )
   api.base  <- api.supported[[api.match]]
 
-  api.query <- query[!is.na(mapNA(query))]
-  api.paths <- paths[!is.na(mapNA(paths))]
+  # cleaning list query and vector paths from empty elements or NA element
+  api.query <- query[!is.na(map_na(query))]
+  api.paths <- paths[!is.na(map_na(paths))]
 
   api.url <- httr::modify_url(api.base, path = api.paths, query = api.query)
+
 
   if ( !quiet ) {
     api.get <- httr::GET(api.url, httr::progress(), config = config )
   } else {
     api.get <- httr::GET(api.url, config = config )
-    }
+  }
 
+
+  # importation status control
   if ( httr::status_code(api.get) != 200 || purrr::is_empty(api.get) ) {
 
     if ( !quiet ) message("error during the importation: status code not equal to 200")
 
-    return(NA)
+    return(NULL)
 
   }
 
 
+  # conversion from json
   if ( json ){
 
     api.content <- httr::content( api.get, "text" )
@@ -61,11 +65,10 @@ Api  <- function(api = "blockchain", paths = NULL, query = NULL, config = list()
 
     api.content <- httr::content( api.get )
 
-
   }
+
+  attr(api.content, "api") <- api.match
 
   return( api.content )
 
 }
-
-

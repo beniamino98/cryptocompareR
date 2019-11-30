@@ -24,8 +24,8 @@ The main goal is to simplify the access to the endpoint of the api and to struct
 a tibble that can be analysed with the  `tidyverse` philosophy. 
 The functions-methods are consistent and the output is always a tibble, containing the data. Furthermore a column is added indicating the symbol and the exchange used, to facilitate the division into groups and the analysis of several symbols simultaneously using the grammar of [tidyverse](https://cran.r-project.org/web/packages/tidyverse/index.html)
 
-See also: [tidyquant](https://cran.r-project.org/web/packages/tidyquant/index.html) 
+ - See also: [tidyquant](https://cran.r-project.org/web/packages/tidyquant/index.html) 
  
  
- This package will be integrated in future if there are others useful apis for cryptocurrency market, and will be part of a suite of cryptocurrency and blockchain data analysis packages.
+ This package will be integrated in future if there are others useful apis for cryptocurrency market, and will be part of a suite of cryptocurrency and       blockchain data analysis packages.
 
