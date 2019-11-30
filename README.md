@@ -96,7 +96,19 @@ cc_get(c("BTC","ETH"), get = "social")
 
 ##### searching generic elements 
 
+
 ```{r}
+
+# works also without an api key 
 cc_get(get = "all_coins")
 cc_get(get = "all_exchanges")
+
+# need a valid api key or to have set one 
+cc_get(get = "all_gamlings", api_key = yourapikey)
+cc_get(get = "all_wallets", api_key = yourapikey)
+cc_get(get = "all_cards", api_key = yourapikey)
+cc_get(get = "all_contracts", api_key = yourapikey)
+cc_get(get = "all_companies", api_key = yourapikey)
+cc_get(get = "all_pools", api_key = yourapikey)
 ```
+
