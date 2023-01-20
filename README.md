@@ -30,6 +30,10 @@ The package allow to retrieve different informations from a given cryptocurrency
 BTC <- cc_price_historical(symbol = "BTC", currency = "USD", 
                            start = "2017-01-01", end = "2023-01-19", 
                            exchange = NULL, interval = "daily", api_key = NULL)
+```
+Printing the output in console gives the following output: 
+
+```{r}
 BTC
 
 # A tibble: 2,209 × 12
@@ -48,7 +52,6 @@ BTC
 # … with 2,199 more rows
 
 ```
-
 
 
 
