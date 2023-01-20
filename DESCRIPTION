@@ -1,0 +1,31 @@
+Package: cryptocompareR
+Title: Cryptocompare Api in R
+Version: 1.0.0
+Author: Beniamino Sartini
+Maintainer: Beniamino Sartini <sartinibeniamino@gmail.com>
+Description: A wrapper for different informations regarding the cypto market, such as 'OHLCV' time series, social data, exchange data and more. 
+             The package provide a way to comunicate with the Cryptocompare Api and to retrieve the outputs in a standard and 'tidy' format.
+License: MIT
+Encoding: UTF-8
+LazyData: true
+Depends:
+    R (>= 3.5.0),
+    lubridate,
+    dplyr,
+    purrr,
+    httr
+Imports:
+    jsonlite, 
+    magrittr,
+    stringr,
+    tibble,
+    tidyr (>= 1.0.0),
+Suggests:
+    tidyverse,
+    broom,
+    knitr,
+    rmarkdown,
+    testthat (>= 2.1.0),
+RoxygenNote: 7.1.1
+Roxygen: list(markdown = TRUE)
+VignetteBuilder: knitr
