@@ -31,7 +31,6 @@ BTC <- cc_price_historical(symbol = "BTC", currency = "USD",
                            start = "2017-01-01", end = "2023-01-19", 
                            exchange = NULL, interval = "daily", api_key = NULL)
 BTC
-```
 
 # A tibble: 2,209 × 12
    Date       Symbol Currency Exchange  high   Low  Open  Volume Close   Adj       OC     HL
@@ -47,6 +46,10 @@ BTC
  9 2017-01-09 BTC    USD      global    910.  871.  901.  62580.  900. 1791. -0.00120 0.0454
 10 2017-01-10 BTC    USD      global    911.  890.  900.  53709.  904. 1803.  0.00510 0.0238
 # … with 2,199 more rows
+
+```
+
+
 
 
 ### Hourly OHLCV Historical Data
