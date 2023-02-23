@@ -11,7 +11,7 @@
 #' @importFrom lubridate ymd dmy ymd_hms dmy_hms
 #' @name as_unix
 #' @rdname as_unix
-#' @return a character.
+#' @return integer character 
 #' @export
 
 as_unix  <- function(x = NULL, milliseconds = FALSE, origin = "1970-01-01") {
