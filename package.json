@@ -1,0 +1,15 @@
+{
+"name": "cryptocompareR",
+"version": "1.0.0",
+"dependencies": {
+  "lubridate": "^1.0.0",
+  "dplyr": "~2.2.0",
+  "purrr": "",
+  "httr": ""
+},
+"devDependencies" : {
+  "my_test_framework": "^3.1.0",
+  "another_dev_dep": "1.0.0 - 1.2.0"
+}
+}
+
