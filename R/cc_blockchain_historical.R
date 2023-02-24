@@ -38,7 +38,7 @@ cc_blockchain_historical <- function(symbol = NULL, start = NULL, end = NULL, ap
   end_date <- ifelse(is.null(end), as.character(Sys.Date()), as.character(end))
   end_date <- as.Date(end_date)
 
-  start_date <- ifelse(is.null(start), as.character(Sys.Date()-2000), as.character(start))
+  start_date <- ifelse(is.null(start), as.character(Sys.Date() - 2000), as.character(start))
   start_date <- as.Date(start_date)
 
   # save function to avoid errors
@@ -50,15 +50,17 @@ cc_blockchain_historical <- function(symbol = NULL, start = NULL, end = NULL, ap
   historical_data = list()
   while(as.Date(start_date) < as.Date(last_date)){
 
-    historical_data[[i]] <- safe_import(symbol = symbol, end = last_date, api_key = api_key)$result
+    historical_data[[i]] <- safe_import(symbol = symbol, 
+                                        end = last_date, 
+                                        api_key = api_key)$result
 
     # break control
     if(is.null(historical_data[[i]]) || nrow(historical_data[[i]]) == 0){
       break
     }
 
-    last_date = historical_data[[i]]$Date[nrow(historical_data[[i]])]
-    i = i + 1
+    i <- i + 1
+    last_date <- historical_data[[i]]$Date[nrow(historical_data[[i]])]
     if(i > 5){
       break
     }

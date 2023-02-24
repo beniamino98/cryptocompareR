@@ -25,13 +25,16 @@ cc_set_environment <- function(){
   exchange <- safe_import("exchange")$result
 
   if(!is.null(coins_Id) & !is.null(exchange)){
-
+    
     assign("coins_Id", value = dplyr::select(coins_Id, Id, Symbol), envir = cryptocompare)
     assign("exchanges", value = exchange$InternalName, envir = cryptocompare)
     message('New environment ', '"cryptocompare"', ' created and added to .GlobalEnv!')
+
   } else {
+    
     load("data/cryptocompare.RData", envir = .GlobalEnv)
     warning('Old environment ', '"cryptocompare"', ' added to .GlobalEnv!')
+    
   }
 }
 
