@@ -8,11 +8,6 @@ output: html_document
 ```{r setup, include=FALSE}
 # general setup 
 knitr::opts_chunk$set(message=FALSE, echo = TRUE,  warning = FALSE, fig.align = "center", fig.pos = "H")
-
-library(knitr)      # knit for `kable()`
-library(rmdformats) # formattazione markdown
-library(kableExtra) # create clean tables for pdf outputs 
-library(cryptocompareR)
 ```
 
 # Introduction to Cryptocompare Api
@@ -25,12 +20,19 @@ In order to install the development package, you can simply use the following co
 remotes::install_github("beniamino98/cryptocompareR")
 # or
 devtools::install_github("beniamino98/cryptocompareR")
-
-library(cryptocompareR)
-
 ```
 
-Cryptocompare's Api is one of the most complete and reliable free Api on the market. A further advantage is that it allows to request not only daily data, but also **hourly**. No other website or Api gives the access to this kind on informations on this time frame. Moreover, with a simple email registration it is possible to obtain a **free api key** that gives you the access to even more end points. 
+```{r Load packages}
+library(dplyr)      # data manipulation and "%>%"
+library(knitr)      # knit for `kable()`
+library(rmdformats) # markdown templates 
+library(kableExtra) # clean table outputs 
+library(cryptocompareR)
+```
+
+<div style="border: 2px solid black; padding: 5px">
+<a href="https://www.cryptocompare.com" target="_blank">Cryptocompare's Api</a> is one of the most complete and reliable free Api on the market. A further advantage is that it allows to request not only daily data, but also **hourly**. No other website or Api gives the access to this kind on informations on this time frame. Moreover, with a simple email registration it is possible to obtain a **free api key** that gives you the access to even more end points. 
+</div>
 
 ## Live Symbol Price
 
@@ -52,33 +54,38 @@ kab %>%
 
 ## Historical Symbol Price (OHLCV)
 
-Get open, high, low, close, and Volume of a symbol from the daily historical data. The values are based on 00:00 GMT time.
+Get daily historical data for **High**, **Low**, **Open**, **Close** and **Volume** of a symbol. The values are based on 00:00 GMT time. The main variables for OHLCV data are: 
+
+- **High**: candle's highest price. 
+- **Low**: candle's lowest price. 
+- **Open**: candle's open price.
+- **Close**: candle's close price. 
+- **Volume**: candle's total volume (buy and sell) in the period.  
+
+In addiction to the **High**, **Low**, **Open**, **Close** and **Volume** we have added 3 more variables: 
+
+- **Adj**: adjusted price computed as the mean price between the High, Low, Open and Close.
+- **OC**: candle's return computed as $\frac{Close - Open}{Open}$
+- **HL**: candle's return computed as $\frac{High - Low}{Low}$
 
 ### Example: Daily Data (1)
 
-```{r Example1 cc_price_historical}
+In order to obtain a time series of OHLCV data it is possible to use the function `cc_price_historical`. Specifying a specific exchange and a symbol it is possible to obtain the data from that exchange. Othewise, as default we have `exchange = NULL` and the function will return a time series computed as global mean among all the exchanges. 
+In the following example we request the data of **BTCUSDT** from `exchange = "Binance"` from `start = "2022-11-01"` up to `end = "2022-12-01"`. For daily data the **api key** is not requested.
 
+```{r Example1 cc_price_historical}
+# historical daily data as global mean among the exchanges 
 kab_daily <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "daily", api_key = NULL) 
 
 kab_daily[1:5,] %>%
   kable() %>%
   kable_classic()
-
 ```
-In addiction to the High, Low, Open, Close, and Volume we have added 3 more variables: 
-
-- **Adj**: the adjusted price, that is computed as the mean price between the High, Low, Open and Close.
-- **OC**: the return of the body of the candle, computed as $\frac{Close - Open}{Open}$
-- **HL**: the return of the candle from the Low to High, computed as $\frac{High - Low}{Low}$
 
 ### Example: Daily Data (2)
 
-It is possible to specify an exchange, for example *Binance* and a specific pair for the symbol searched. In the following example we search for the daily candles of the pair BTC-USDT in the Binance exchange. 
-
-- the **api key** is not requested.
-
 ```{r Example cc_price_historical daily Binance}
-
+# historical daily data for Binance
 kab_daily <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = "Binance", currency = "USDT", interval = "daily", api_key = NULL) 
 
 kab_daily[1:5,] %>%
@@ -88,7 +95,7 @@ kab_daily[1:5,] %>%
 
 ### Example: Hourly Data (1)
 
-Changing the interval to *hourly* allow to retrieve the hourly candles for the pair specified. In this case the **api key** is not requested. 
+Changing the interval to *hourly* allow to retrieve the hourly candles for the pair. Also in this case the **api key** is not requested. 
 
 ```{r Example cc_price_historical hourly}
 kab_hourly <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "hourly", api_key = NULL) 
@@ -100,7 +107,7 @@ kab_hourly[1:5,] %>%
 
 ### Example: Minutely Data (1)
 
-Changing the interval to *minutely* allow to retrieve the minutely data for the last 7 days. In order to get more data an api key (also with the free plan) is needed.
+Changing the interval to *minutely* allow to retrieve the minutely data for the pair only for the last 7 days. In order to get more data an api key is requested.
 
 ```{r Example cc_price_historical minutely}
 kab_minutely <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "minutely", api_key = NULL) 
