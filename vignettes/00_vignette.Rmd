@@ -13,9 +13,6 @@ library(knitr)      # knit for `kable()`
 library(rmdformats) # formattazione markdown
 library(kableExtra) # create clean tables for pdf outputs 
 library(cryptocompareR)
-
-api_key = "153bc970c37d2a4d8e6735f89d5602b7787f9765e0add94ad960ff91b0326813"
-
 ```
 
 # Introduction to Cryptocompare Api
@@ -33,7 +30,7 @@ library(cryptocompareR)
 
 ```
 
-The Cryptocompare's Api is one of the most complete and reliable free Api on the market. A further advantage is that it allows to request not only daily data, but also **hourly**. No other website or Api gives the access to this kind on informations on this time frame. Moreover, with a simple email registration it is possible to obtain a **free api key** that gives you the access to even more end points. 
+Cryptocompare's Api is one of the most complete and reliable free Api on the market. A further advantage is that it allows to request not only daily data, but also **hourly**. No other website or Api gives the access to this kind on informations on this time frame. Moreover, with a simple email registration it is possible to obtain a **free api key** that gives you the access to even more end points. 
 
 ## Live Symbol Price
 
@@ -46,7 +43,6 @@ Get the current price of any cryptocurrency in any other currency that you need.
 
 
 ```{r Example cc_symbol_price}
-
 kab <- cc_symbol_price(symbol = c("BTC", "ETH"), currency = c("USDT", "BUSD"), exchange = c("Binance", "Kraken", "Coinbase"), api_key = NULL)
 
 kab %>%
@@ -69,9 +65,9 @@ kab_daily[1:5,] %>%
   kable_classic()
 
 ```
-In addiction to the High, Low, Open, Close, and Volume variables we have added 3 more variables that are: 
+In addiction to the High, Low, Open, Close, and Volume we have added 3 more variables: 
 
-- **Adj**: the adjusted price is computed as the mean price between the High, Low, Open and Close.
+- **Adj**: the adjusted price, that is computed as the mean price between the High, Low, Open and Close.
 - **OC**: the return of the body of the candle, computed as $\frac{Close - Open}{Open}$
 - **HL**: the return of the candle from the Low to High, computed as $\frac{High - Low}{Low}$
 
@@ -88,44 +84,31 @@ kab_daily <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2
 kab_daily[1:5,] %>%
   kable() %>%
   kable_classic()
-
 ```
-
 
 ### Example: Hourly Data (1)
 
-Changing the interval from *daily* to *hourly* allow to retrieve the hourly candles for the pair specified. 
-
-- the **api key** is not requested. 
+Changing the interval to *hourly* allow to retrieve the hourly candles for the pair specified. In this case the **api key** is not requested. 
 
 ```{r Example cc_price_historical hourly}
-
 kab_hourly <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "hourly", api_key = NULL) 
 
 kab_hourly[1:5,] %>%
   kable() %>%
   kable_classic()
-
 ```
 
 ### Example: Minutely Data (1)
 
-- with a NULL api_key or with an api_key with the free plan the maximum days are 7. 
-
-- the **api key** is not requested for data up to 7 days, for more data the key is needed.
+Changing the interval to *minutely* allow to retrieve the minutely data for the last 7 days. In order to get more data an api key (also with the free plan) is needed.
 
 ```{r Example cc_price_historical minutely}
-
 kab_minutely <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "minutely", api_key = NULL) 
 
 kab_minutely[1:5,] %>%
   kable() %>%
   kable_classic()
-
 ```
-
-
-## Historical Blockchain Data 
 
 
 
