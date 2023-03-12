@@ -1,4 +1,4 @@
-<h1>A Wrapper for Cryptocompare Api in R [<img src="https://www.cryptocompare.com/media/20562/favicon.png?v=10" width=30 height=30 style="display: inline;">](https://min-api.cryptocompare.com/documentation)</h1>
+# A Wrapper for Cryptocompare Api in R [<img src="https://www.cryptocompare.com/media/20562/favicon.png?v=10" width=30 height=30 style="display:inline;">](https://min-api.cryptocompare.com/documentation)
 
 The package is part of a set of developing packages that allow a *tidy* approach, for downloading, grouping and analyzing data for cryptocurrencies. 
 
