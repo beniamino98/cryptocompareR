@@ -1,4 +1,4 @@
-![cryptocompareApi](images/0.png)
+<imgsrc="images/0.png">
 
 <h1>A Wrapper for Cryptocompare Api in R</h1>
 
