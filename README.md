@@ -1,4 +1,4 @@
-<img src="images/0.png">
+<img src="https://www.cryptocompare.com/media/20562/favicon.png?v=10">
 
 <h1>A Wrapper for Cryptocompare Api in R</h1>
 
