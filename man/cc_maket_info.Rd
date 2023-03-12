@@ -28,10 +28,10 @@ Using a free api key, obtained from the website, you can access also to the endp
 a tibble, the dimensions of the output depend on the "info" parameters.
 }
 \description{
-function to retrieve the "general informations", using the cryptocompare Api.
+Retrieve the general informations, using the cryptocompare Api.
 }
 \details{
-
+to be written
 }
 \examples{
 # Endpoints reachable without an Api Key

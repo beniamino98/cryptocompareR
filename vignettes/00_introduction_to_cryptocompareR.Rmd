@@ -1,7 +1,7 @@
 ---
-title: "00_introduction_to_cryptocompareR"
+title: "Introduction to cryptocompareR"
 author: "Beniamino Sartini"
-date: "2023-01-19"
+date: "2023-03-12"
 output: html_document
 ---
 
@@ -34,9 +34,9 @@ library(cryptocompareR)
 <a href="https://www.cryptocompare.com" target="_blank">Cryptocompare's Api</a> is one of the most complete and reliable free Api on the market. A further advantage is that it allows to request not only daily data, but also **hourly**. No other website or Api gives the access to this kind on informations on this time frame. Moreover, with a simple email registration it is possible to obtain a **free api key** that gives you the access to even more end points. 
 </div>
 
-## Live Symbol Price
+## Symbol Price
 
-Get the current price of any cryptocurrency in any other currency that you need. If the crypto does not trade directly into the **currency** requested, BTC will be used for conversion. If the opposite pair trades we invert it (eg.: BTC-XMR)
+Get the current price of any cryptocurrency given a specific currency. If the selected symbol does not trade directly into the **currency** requested, BTC will be used for conversion. If the opposite pair trades we invert it (eg.: BTC-XMR)
 
 - allow multiple symbols (e.g.: c("BTC", "ETH"))
 - allow multiple currency (e.g.: c("USDT", "BUSD"))
@@ -62,7 +62,7 @@ Get daily historical data for **High**, **Low**, **Open**, **Close** and **Volum
 - **Close**: candle's close price. 
 - **Volume**: candle's total volume (buy and sell) in the period.  
 
-In addiction to the **High**, **Low**, **Open**, **Close** and **Volume** we have added 3 more variables: 
+In addiction to **High**, **Low**, **Open**, **Close** and **Volume** we have added 3 more variables: 
 
 - **Adj**: adjusted price computed as the mean price between the High, Low, Open and Close.
 - **OC**: candle's return computed as $\frac{Close - Open}{Open}$
@@ -71,7 +71,7 @@ In addiction to the **High**, **Low**, **Open**, **Close** and **Volume** we hav
 ### Example: Daily Data (1)
 
 In order to obtain a time series of OHLCV data it is possible to use the function `cc_price_historical`. Specifying a specific exchange and a symbol it is possible to obtain the data from that exchange. Othewise, as default we have `exchange = NULL` and the function will return a time series computed as global mean among all the exchanges. 
-In the following example we request the data of **BTCUSDT** from `exchange = "Binance"` from `start = "2022-11-01"` up to `end = "2022-12-01"`. For daily data the **api key** is not requested.
+In the following example we request the data of **BTCUSD** from `start = "2022-11-01"` up to `end = "2022-12-01"`. For daily data the **api key** is not requested.
 
 ```{r Example1 cc_price_historical}
 # historical daily data as global mean among the exchanges 
@@ -84,7 +84,9 @@ kab_daily[1:5,] %>%
 
 ### Example: Daily Data (2)
 
-```{r Example cc_price_historical daily Binance}
+In the following example we request the data of **BTCUSDT** from `exchange = "Binance"` from `start = "2022-11-01"` up to `end = "2022-12-01"`. For daily data the **api key** is not requested.
+
+```{r Example2 cc_price_historical}
 # historical daily data for Binance
 kab_daily <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = "Binance", currency = "USDT", interval = "daily", api_key = NULL) 
 
@@ -97,7 +99,8 @@ kab_daily[1:5,] %>%
 
 Changing the interval to *hourly* allow to retrieve the hourly candles for the pair. Also in this case the **api key** is not requested. 
 
-```{r Example cc_price_historical hourly}
+```{r Example3 cc_price_historical}
+
 kab_hourly <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "hourly", api_key = NULL) 
 
 kab_hourly[1:5,] %>%
@@ -109,7 +112,8 @@ kab_hourly[1:5,] %>%
 
 Changing the interval to *minutely* allow to retrieve the minutely data for the pair only for the last 7 days. In order to get more data an api key is requested.
 
-```{r Example cc_price_historical minutely}
+```{r Example4 cc_price_historical}
+
 kab_minutely <- cc_price_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "minutely", api_key = NULL) 
 
 kab_minutely[1:5,] %>%
@@ -118,5 +122,43 @@ kab_minutely[1:5,] %>%
 ```
 
 
+## Historical Exchange Volume
 
+Get daily historical volume data for a symbol. The values are based on 00:00 GMT time. It is possible to obtain 3 different kind of data: 
 
+1. Specifying a Symbol but letting `Exchange = NULL` we will obtain the volume for the symbol considering the sum of the exchanges.
+2. Specifying an Exchange but letting `Symbol = NULL` we will obtain the volume for the exchange considering the sum of the symbols traded. 
+3. Specifying a Symbol and an Exchange will return the volume for the symbol specified considering the specified exchange.
+
+### Example: Symbol Volume (1)
+
+```{r Example1 cc_exchange_historical}
+# historical daily data as global mean among the exchanges 
+kab_daily <- cc_exchange_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = NULL, currency = "USD", interval = "daily", api_key = NULL) 
+
+kab_daily[1:5,] %>%
+  kable() %>%
+  kable_classic()
+```
+
+### Example: Exchange Volume (2)
+
+```{r Example2 cc_exchange_historical}
+# historical daily data as global mean among the exchanges 
+kab_daily <- cc_exchange_historical(symbol = NULL, start = "2022-11-01", end =  "2022-12-01", exchange = "Binance", currency = "USD", interval = "daily", api_key = NULL) 
+
+kab_daily[1:5,] %>%
+  kable() %>%
+  kable_classic()
+```
+### Example: Symbol and Exchange Volume (3)
+
+```{r Example3 cc_exchange_historical}
+
+# historical daily data as global mean among the exchanges 
+kab_daily <- cc_exchange_historical(symbol = "BTC", start = "2022-11-01", end =  "2022-12-01", exchange = "Binance", currency = "USDT", interval = "daily", api_key = NULL) 
+
+kab_daily[1:5,] %>%
+  kable() %>%
+  kable_classic()
+```

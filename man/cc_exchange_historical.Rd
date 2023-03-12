@@ -21,7 +21,7 @@ cc_exchange_historical(
 
 \item{end}{character or Date, the end date for importation.}
 
-\item{exchange}{character, the exchange in which retrieve the informations, if NULL it will be returned a mean between all the exchanges and denoted with "global".}
+\item{exchange}{character, the exchange in which retrieve the information, if NULL it will be returned a mean between all the exchanges and denoted with "global".}
 
 \item{currency}{character, the currency in which convert the output.}
 

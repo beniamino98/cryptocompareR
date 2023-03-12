@@ -1,7 +1,7 @@
 #' @title as_unix
-#' @description The objective of the function is to convert a Date into the unix format: an integer denoting the number of seconds from the origin date, that is set usually to "1970-01-01".
+#' @description This function convert a Date into Unix format: an integer denoting the number of seconds from the origin date, usually "1970-01-01".
 #' @param x character or Date, in the format "yyyy-mm-dd" or "dd-mm-yyyy". In alternative it is possible to specify the Date also with the time in the format "yyyy-mm-dd hh:mm:ss" or "dd-mm-yyyy hh:mm:ss"
-#' @param milliseconds logical, if TRUE the output will be converted in milliseconds, if FALSE it will be in seconds.
+#' @param milliseconds logical, if TRUE the output will be converted in milliseconds, otherwise it will be in seconds.
 #' @param origin character denoting the origin date.
 #' @examples
 #' as_unix("2023-01-01")

@@ -1,6 +1,9 @@
 #' @title cryptocompare_api
-#' @description function to retrieve the "general informations", using the cryptocompare Api.
-#'
+#' @name cc_maket_info
+#' @rdname cc_maket_info
+#' 
+#' @description Retrieve the general informations, using the cryptocompare Api.
+#' 
 #' @param info  character, the info to be obtained. Without a valid api_key you can access only to the "coins" and "exchanges" endpoints.
 #' Using a free api key, obtained from the website, you can access also to the endpoints:
 #' \itemize{
@@ -11,11 +14,9 @@
 #' @param api_key character, a valid api key from cyptocompare.com.
 #' @param verbose logical, if TRUE it will display warning messages if you do not insert a valid api key for the api-key-only endpoints.
 #'
-#' @details
-#'
+#' @details to be written
 #'
 #' @return a tibble, the dimensions of the output depend on the "info" parameters.
-#'
 #'
 #' @examples
 #' # Endpoints reachable without an Api Key
@@ -34,13 +35,11 @@
 #' cc_maket_info("pools", api_key = api_key)
 #' cc_maket_info("blockchain", api_key = api_key)
 #'
-#' @name cc_maket_info
-#' @rdname cc_maket_info
 #' @export
 
 cc_maket_info <- function(info = "coins", currency = "USD", api_key = NULL, verbose = FALSE){
 
-  # path for general info
+  # available paths for general info
   general_info <- list(
     blockchain = "blockchain/list",
     cards = "cards/general",
@@ -54,26 +53,29 @@ cc_maket_info <- function(info = "coins", currency = "USD", api_key = NULL, verb
     pools = "mining/pools/general"
   )
 
+  # match the path 
   search_match <- match.arg(info, choices = names(general_info))
 
-  # check for API key if endpoints are different from "coins" or "exchanges"
-  if(is.null(api_key) && !search_match %in% c("coins", "exchanges") ){
+  # check if endpoints are different from "coins" or "exchanges" and api_key is NULL
+  if (is.null(api_key) && !search_match %in% c("coins", "exchanges")) {
 
-    if(verbose) warning("The Endpoint", '"', search_match,'"',  " need a valid Api Key!")
-
+    if (verbose) {
+      warning("The Endpoint", '"', search_match,'"',  " need a valid Api Key!")
+    }
+    
     return(NULL)
   }
 
-  # Path
-  search_paths <- c("data", general_info[[search_match]] )
+  # api path 
+  api_path <- c("data", general_info[[search_match]])
 
-  # Query
-  search_query <- list(tsym = currency, api_key = api_key)
+  # api query
+  api_query <- list(tsym = currency, api_key = api_key)
 
   # GET call
-  search_api <- cryptocompare_api(path = search_paths, query = search_query)$Data
+  response <- cryptocompare_api(path = api_path, query = api_query)$Data
 
-  # Replace null with NA's in order to build the dataframe
+  # function for replacing NULL values with NA's in order to build a tibble
   safe_tibble <- function(x){
 
     x.cond <- purrr::map_lgl(x, is.list)
@@ -84,121 +86,94 @@ cc_maket_info <- function(info = "coins", currency = "USD", api_key = NULL, verb
   }
 
   # Output Data
-  search_api <- purrr::map_df(search_api, safe_tibble)
+  response <- purrr::map_df(response, safe_tibble)
 
-  # Cleaning depending on the ourput
-  if(info == "coins"){
-
-    search_api <- dplyr::mutate(search_api,
+  # different cleaning on the enpoint 
+  if (info == "coins") {
+    
+    response <- dplyr::mutate(response,
                          Algorithm = toupper(Algorithm),
                          Algorithm = stringr::str_trim(Algorithm),
                          ProofType = toupper(ProofType),
                          ProofType = stringr::str_trim(ProofType)
     )
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", ""), NA_character_, .x))
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-    search_api <- dplyr::arrange(search_api, Rank)
-    search_api <- dplyr::select(search_api, -Url, -ImageUrl, -SortOrder)
-    search_api <- dplyr::filter(search_api, IsTrading)
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", ""), NA_character_, .x))
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::arrange(response, Rank)
+    response <- dplyr::select(response, -Url, -ImageUrl, -SortOrder)
+    response <- dplyr::filter(response, IsTrading)
+    
+  } else if (info == "blockchain") {
 
-
-  } else if (info == "blockchain"){
-
-    search_api <- dplyr::mutate(search_api,
+    response <- dplyr::mutate(response,
                                 From = as.POSIXct(data_available_from, origin = "1970-01-01"),
-                                From = as.Date(From)
-    )
+                                From = as.Date(From))
+    response <- dplyr::select(response, -data_available_from)
+    response <- dplyr::arrange(response, From)
 
-    search_api <- dplyr::select(search_api, -data_available_from)
-    search_api <- dplyr::arrange(search_api, From)
+  } else if (info == "exchanges") {
 
-  } else if (info == "exchanges"){
-
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api,
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response,
                                 -Url, -LogoUrl, -SortOrder, -ItemType,
                                 -Description, -Fees, -DepositMethods, -WithdrawalMethods,
                                 -Sponsored, -Recommended )
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+  }  else if (info == "gambling") {
 
-    search_api <- dplyr::arrange(search_api, Rank)
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -BettingLimits)
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-  }  else if (info == "gambling"){
+  } else if (info == "wallets") {
 
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, 
+                              -IsUsingOurApi, -HasVouchersAndOffers, -WalletFeatures)
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -BettingLimits)
+  } else if (info == "cards") {
 
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended)
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-    search_api <- dplyr::arrange(search_api, Rank)
+  } else if (info == "contracts") {
 
-  } else if (info == "wallets"){
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -CurrenciesAvailableLogo )
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
+  } else if (info == "companies") {
 
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -IsUsingOurApi, -HasVouchersAndOffers, -WalletFeatures)
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+  } else if (info == "pools") {
 
-    search_api <- dplyr::arrange(search_api, Rank)
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
-  } else if (info == "cards"){
+  } else if (info == "equipment") {
 
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended)
-
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
-
-    search_api <- dplyr::arrange(search_api, Rank)
-
-  } else if (info == "contracts"){
-
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -CurrenciesAvailableLogo )
-
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
-
-    search_api <- dplyr::arrange(search_api, Rank)
-
-  } else if (info == "companies"){
-
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
-
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
-
-    search_api <- dplyr::arrange(search_api, Rank)
-
-  } else if (info == "pools"){
-
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
-
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
-
-    search_api <- dplyr::arrange(search_api, Rank)
-
-
-  } else if (info == "equipment"){
-
-    search_api <- dplyr::mutate(search_api, Rank = as.integer(SortOrder))
-
-    search_api <- dplyr::select(search_api, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
-
-    search_api <- dplyr::mutate_if(search_api, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
-
-    search_api <- dplyr::arrange(search_api, Rank)
+    response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
+    response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
+    response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
+    response <- dplyr::arrange(response, Rank)
 
   }
 
-  return(search_api)
+  return(response)
 
 }
 

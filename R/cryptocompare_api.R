@@ -1,5 +1,7 @@
 #' @title cryptocompare_api
-#'
+#' @name cryptocompare_api
+#' @rdname cryptocompare_api
+#' 
 #' @description Function to execute a call to the cryptocompare Api. It will automatically detect if some errors has occurred, in that case the function will return NULL.
 #' It is build using the `httr` functions.
 #'
@@ -15,7 +17,6 @@
 #'  If this encoding fails (usually because the page declares an incorrect encoding), `content()` will return NA.
 #'  \item `type = "auto"`, will return a parsed R object.
 #' }
-#'
 #'
 #' @examples
 #' api_paths = c("data", "exchange", "histoday")
@@ -33,45 +34,51 @@
 #'
 #' @importFrom httr GET modify_url status_code content
 #' @importFrom jsonlite fromJSON
+#' @importFrom purrr is_empty 
 #' @export
 
 cryptocompare_api <- function(path = NULL, query = NULL, config = list(), type = "text", encoding = "UTF-8", tojson = TRUE){
 
-  # Base Url Api
+  # api base url
   api_base <- "https://min-api.cryptocompare.com"
 
-  # Path and Query parameters
+  # path and query for api call 
   api_paths <- path[!is.null(path) && !is.na(path)]
   api_query <- query[!is.null(query) && !is.na(query)]
 
-  # creation api url for the call
+  # create the api url for the call
   api_url <- httr::modify_url(api_base, path = api_paths, query = api_query)
 
-  # GET call
-  api_get <- httr::GET(api_url, config = config )
+  # ppi GET call
+  api_get <- httr::GET(api_url, config = config)
 
-  # status control
+  # condition status code and condition response is empty 
   api_status <- httr::status_code(api_get) == 200
   api_empty  <- purrr::is_empty(api_get)
 
-  # error status
-  if(!api_status){warning("GET Request Error: status code is not equal to 200.")}
+  # check error status code
+  if (!api_status) {
+    warning("GET Request Error: status code is not equal to 200.")
+  }
 
-  # error empty
-  if(api_empty){warning("GET Request Error: get request is empty!")}
+  # check error response is empty 
+  if (api_empty) { 
+    warning("GET Request Error: get request is empty!")
+  }
 
-  # transformation with encoding or JSON
-  if(api_status && !api_empty){
+  # extract the content 
+  if (api_status && !api_empty) {
     api_content <- httr::content(api_get, type = type, encoding = encoding)
-    if(tojson){
+    # convert data from Json
+    if (tojson) {
       api_content <- jsonlite::fromJSON(api_content)
     }
   } else {
     api_content <- NULL
   }
 
-  # adding Api attribute
-  attr(api_content, "Api") <- "cryptocompare"
+  # add api attribute
+  attr(api_content, "api") <- "cryptocompare"
 
   return(api_content)
 

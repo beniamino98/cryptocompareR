@@ -10,7 +10,7 @@
 #' cc_symbol_price(symbol = "BTC", exchange = NULL, currency = "USD")
 #'
 #' # Mean Price for the Pair BTC-USD and ETH-USD between the exchanges
-#' cc_symbol_price(symbol = c("BTC", "ETH"), exchange = NULL, currency = c"USD")
+#' cc_symbol_price(symbol = c("BTC", "ETH"), exchange = NULL, currency = "USD")
 #'
 #' # Price for the Pair BTC-USDT, ETH-USDT, BTC-BUSD, ETH-BUSD on Binance
 #' cc_symbol_price(symbol = c("BTC", "ETH"),
@@ -22,57 +22,47 @@
 
 cc_symbol_price <- function(symbol = NULL, exchange = NULL, currency = "USD", api_key = NULL){
 
-  if(is.null(exchange)){
-
-    cc_api_symbol_price(symbol = symbol, currency = currency, exchange = exchange, api_key = api_key)
-
+  if (is.null(exchange)) {
+    out_data <- cc_api_symbol_price(symbol = symbol, currency = currency, exchange = exchange, api_key = api_key)
   } else {
-
-    purrr::map_df(exchange, ~cc_api_symbol_price(symbol = symbol, currency = currency, exchange = .x, api_key = api_key))
-
+    out_data <- purrr::map_df(exchange, ~cc_api_symbol_price(symbol = symbol, currency = currency, exchange = .x, api_key = api_key))
   }
+  return(out_data)
 }
 
 
 # Single Function for comunicating with the API: allow multiple symbols and currencies but not multiple exchanges.
 cc_api_symbol_price <- function(symbol = NULL, currency = "USD", exchange = NULL, api_key = NULL){
 
-  # control on inputs
+  # inputs control
   if(is.null(symbol) | is.null(currency)){
-    warning("At least one symbol and one currency must be inserted.")
+    warning("You should provide at least a symbol and a currency.")
     return(NULL)
   }
 
-  # create multiple symbols argument
-  symbol <- toupper(symbol)
-  symbol <- paste0(symbol, collapse = ",")
+  # multiple symbols argument
+  symbol <- paste0(toupper(symbol), collapse = ",")
 
-  # create multiple currency argument
-  currency <- toupper(currency)
-  currency <- paste0(currency, collapse = ",")
+  # multiple currency argument
+  currency <- paste0(toupper(currency), collapse = ",")
 
-  # get the content
-  html_content <- cryptocompare_api(path = c("data", "pricemulti"), query = list(fsyms = symbol, tsyms = currency, e = exchange))
-
-  # save the importation time
-  importation_time <- Sys.time()
+  # Api GET call
+  response <- cryptocompare_api(path = c("data", "pricemulti"), query = list(fsyms = symbol, tsyms = currency, e = exchange))
 
   # create a unique dataset
-  html_data <- dplyr::mutate(dplyr::bind_rows(html_content[[1]]), Symbol = names(html_content)[1])
+  out_data <- dplyr::mutate(dplyr::bind_rows(response[[1]]), Symbol = names(response)[1])
 
-  if(length(html_content) > 1){
-
-    for(i in 2:length(html_content)){
-
-      html_data <- dplyr::bind_rows(html_data, dplyr::mutate(dplyr::bind_rows(html_content[[i]]), Symbol = names(html_content)[i]))
-
+  if (length(response) > 1) {
+    for(i in 2:length(response)) {
+      new_data <- dplyr::mutate(dplyr::bind_rows(response[[i]]), Symbol = names(response)[i])
+      out_data <- dplyr::bind_rows(out_data, new_data)
     }
+  } 
 
-  }
+  # add Date and Exchange 
+  out_data <- dplyr::mutate(out_data, Date = Sys.time(), Exchange = ifelse(is.null(exchange), "General", exchange))
+  # reorder the columns 
+  out_data <- dplyr::select(out_data, Date, Exchange, Symbol, dplyr::everything())
 
-  # adding Time and Exchange and reordering the variables
-  html_data <- dplyr::mutate(html_data, Date = importation_time, Exchange = ifelse(is.null(exchange), "General", exchange))
-  html_data <- dplyr::select(html_data, Date, Exchange, Symbol, dplyr::everything())
-
-  return(html_data)
+  return(out_data)
 }

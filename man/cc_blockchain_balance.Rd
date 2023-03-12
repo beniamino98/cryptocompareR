@@ -34,9 +34,7 @@ The output of the function will be a tibble with 6 columns:
 \examples{
 
 # Api key is required
-
 yourapikey <- "yourapikey"
-
 cc_blockchain_balance(start = "2017-01-01",
                       end = "2023-01-01",
                       api_key = yourapikey)

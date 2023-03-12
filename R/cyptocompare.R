@@ -86,8 +86,6 @@ cc_api_key <- function(verbose = FALSE){
   return(NULL)
 }
 
-
-
 #' @title cc_symbol_id
 #' @description retrieve the Id using the symbol, useful for uniforming the social function with the others.
 #' @param symbol character, the symbol for which we would like to know the Id.
@@ -111,7 +109,6 @@ cc_symbol_id <- function(symbol = NULL){
   }
   return(NULL)
 }
-
 
 #' @title cc_all_exchanges
 #' @description retrieve the names of all the exchanges available in cryptocompare Api.

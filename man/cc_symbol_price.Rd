@@ -31,7 +31,7 @@ function for obtaining the last price for a symbol or a vector of symbols.
 cc_symbol_price(symbol = "BTC", exchange = NULL, currency = "USD")
 
 # Mean Price for the Pair BTC-USD and ETH-USD between the exchanges
-cc_symbol_price(symbol = c("BTC", "ETH"), exchange = NULL, currency = c"USD")
+cc_symbol_price(symbol = c("BTC", "ETH"), exchange = NULL, currency = "USD")
 
 # Price for the Pair BTC-USDT, ETH-USDT, BTC-BUSD, ETH-BUSD on Binance
 cc_symbol_price(symbol = c("BTC", "ETH"),
