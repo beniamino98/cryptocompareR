@@ -1,12 +1,14 @@
 ![cryptocompareApi](images/0.png)
 
-# cryptocompareR: A Wrapper for Cryptocompare Api in R
+<h1>A Wrapper for Cryptocompare Api in R</h1>
 
-The package will be part of a set of developing packages that allow a "tidy" approach, for downloading, grouping and analyzing data deriving from blockchain technology. The goal of cryptocompareR is to integrate with the frameworks already introduced by other packages: first of all "tidyverse" and then "quantmod", "tidyquant", etc. and expand the range of downloadable and analysable data.
+The package is part of a set of developing packages that allow a *tidy* approach, for downloading, grouping and analyzing data for cryptocurrencies. 
 
-The Data were provided from the [cryptocompare Api](https://www.cryptocompare.com). 
+The Data are provided by [cryptocompare Api](https://www.cryptocompare.com). 
 
-[Click Here to see te Api Documentation](https://min-api.cryptocompare.com/documentation)
+- Here the [official Api Documentation](https://min-api.cryptocompare.com/documentation)
+
+- Here the [R package Api Documentation](https://beniamino98.github.io/cryptocompareR-docs/)
 
 
 # Installation 
@@ -124,15 +126,9 @@ c(min(BTC$Date), max(BTC$Date))
 ```{r}
 
 live_data <- cc_symbol_price(symbol = c("BTC", "ETH"), currency = c("USDT", "BUSD"), exchange = c("Binance", "Kraken", "Coinbase"), api_key = NULL)
-
-```
-
-Printing the output in console gives the following output: 
-
-```{r}
 live_data
 
-> # A tibble: 6 × 5
+# A tibble: 6 × 5
   Date                Exchange Symbol   USDT   BUSD
   <dttm>              <chr>    <chr>   <dbl>  <dbl>
 1 2023-01-20 23:50:05 Binance  BTC    22621. 22630.
@@ -141,11 +137,8 @@ live_data
 4 2023-01-20 23:50:05 Kraken   ETH     1654.    NA 
 5 2023-01-20 23:50:05 Coinbase BTC    22659     NA 
 6 2023-01-20 23:50:05 Coinbase ETH     1654.    NA 
-
 ```
 
-
-### Different Exchanges 
 
 
 
