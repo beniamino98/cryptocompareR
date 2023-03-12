@@ -1,4 +1,4 @@
-<imgsrc="images/0.png">
+<img src="images/0.png">
 
 <h1>A Wrapper for Cryptocompare Api in R</h1>
 
