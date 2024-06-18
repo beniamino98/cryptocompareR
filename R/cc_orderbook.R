@@ -1,111 +1,165 @@
+#' Exchanges With Order Book Data
+#' 
+#' Returns all the exchanges we have order book level 2 data. 
+#' 
+#' @param api_key Character, mandatory. 
+#' 
+#' @usage 
+#' cc_orderbook_exchange(api_key = NULL)
+#' 
+#' @details 
+#' It is possible to access to this endpoint with an `api_key`. 
+#' 
+#' @export
+#' 
+#' @rdname cc_orderbook_exchange
+#' @name cc_orderbook_exchange
 
 cc_orderbook_exchange <- function(api_key = NULL){
 
-  if(is.null(api_key)){
-    warning("Need a valid Api Key to reach this endpoint!")
-    return(NULL)
-  }
+  # Check "api_key" argument 
+  if (missing(api_key) || is.null(api_key)) {
+    if (!quiet) {
+      msg <- paste0('An "api_key" is required to reach this endpoint!')
+      cli::cli_alert_danger(msg)
+      return(NULL)
+    }
+  } 
+  
+  # GET call
   api_paths <- c("data", "ob", "exchanges")
   api_query <- list(api_key = api_key)
-
-  out_data <- cryptocompare_api(path = api_paths, query = api_query)
-
-  out_data <- purrr::map(out_data$Data, ~.x$orderBookInternalName)
-
-  dplyr::tibble(Exchange = names(out_data), OB = unlist(out_data))
-
+  response <- cryptocompare_api(path = api_paths, query = api_query)
+  # Output data
+  data_out <- purrr::map(response$Data, ~.x$orderBookInternalName)
+  data_out <- dplyr::tibble(exchange = names(data_out), internal_name = unlist(data_out))
+  
+  return(data_out)
 }
 
-cc_L1_order_book <- function(symbol = NULL, currency = NULL, exchange = NULL, api_key = NULL){
+#' Order Book L1 Top
+#' 
+#' Returns latest order book Level 1 bid/ask values for the specified symbol, currency and exchange.
+#' 
+#' @param symbol Character, 
+#' @param currency Character
+#' @param exchange Character
+#' @param api_key Character, mandatory. 
+#' @param quiet Logical
+#' 
+#' @usage 
+#' cc_L1_order_book(symbol, 
+#'                  currency, 
+#'                  exchange = NULL, 
+#'                  api_key = NULL, 
+#'                  quiet = FALSE)
+#' 
+#' @details 
+#' It is possible to access to this endpoint with an `api_key`. 
+#' 
+#' @export
+#' 
+#' @rdname cc_L1_order_book
+#' @name cc_L1_order_book
 
-  if(is.null(api_key)){
-    warning("Need a valid Api Key to reach this endpoint!")
-    return(NULL)
+cc_L1_order_book <- function(symbol, currency, exchange = NULL, api_key = NULL, quiet = FALSE){
+
+  # Check "symbol" argument 
+  if (missing(symbol) || is.null(symbol)) {
+    if (!quiet) {
+      msg <- paste0('The "symbol" argument is missing with no default argument.')
+      cli::cli_abort(msg)
+    }
+  } else {
+    symbol <- toupper(symbol)
   }
-
-  query_currency <- paste0(currency, collapse = ",")
-  query_symbol   <- paste0(symbol, collapse = ",")
-
+  
+  # Check "currency" argument 
+  if (missing(currency) || is.null(currency)) {
+    currency <- "USD"
+    if (!quiet) {
+      msg <- paste0('The "currency" argument is missing, default is ', '"', currency, '"')
+      cli::cli_alert_warning(msg)
+    }
+  } else {
+    currency <- toupper(currency)
+  }
+  
+  # Check "api_key" argument 
+  if (missing(api_key) || is.null(api_key)) {
+    if (!quiet) {
+      msg <- paste0('An "api_key" is required to reach this endpoint!')
+      cli::cli_alert_danger(msg)
+      return(NULL)
+    }
+  } 
+  
+  # GET call
   api_paths <- c("data", "ob", "l1", "top")
-  api_query <- list(fsyms = symbol.query, tsyms = currency.query, e = exchange, api_key = api_key)
-
-  out_data <- cryptocompare_api(path = api_paths, query = api_query)
-
-  if(out_data$Response == "Error"){
-    warning(out_data$Message)
+  api_query <- list(fsyms = paste0(symbol, collapse = ","), tsyms = paste0(currency, collapse = ","), e = exchange, api_key = api_key)
+  response <- cryptocompare_api(path = api_paths, query = api_query)
+  if (response$Response == "Error") {
+    cli::cli_alert_danger(response$Message)
     return(NULL)
   }
-
-  new_out_data <- purrr::map2_df(out_data$Data$RAW[[1]], currency, ~dplyr::bind_cols(Currency = .y, dplyr::bind_cols(.x) ))
-  new_out_data <- dplyr::bind_cols(new_out_data, Symbol = symbol[1])
-
-  if(length(symbol) > 1){
-    for(i in 2:length(cc_data$Data$RAW)){
-
-      new_data     <- purrr::map2_df(out_data$Data$RAW[[i]], currency, ~dplyr::bind_cols(Currency = .y, dplyr::bind_cols(.x) ))
-      new_data     <- dplyr::bind_cols(new_data, Symbol = symbol[i])
-      new_out_data <- dplyr::bind_rows(new_out_data, new_data )
+  # Output data
+  data_out <- purrr::map2_df(response$Data$RAW[[1]], currency, ~dplyr::bind_cols(currency = .y, dplyr::bind_cols(.x) ))
+  data_out <- dplyr::bind_cols(data_out, symbol = symbol[1])
+  if (length(symbol) > 1) {
+    for(i in 2:length(response$Data$RAW)) {
+      data_new <- purrr::map2_df(response$Data$RAW[[i]], currency, ~dplyr::bind_cols(currency = .y, dplyr::bind_cols(.x) ))
+      data_new <- dplyr::bind_cols(data_out, symbol = symbol[i])
+      data_out <- dplyr::bind_rows(data_out, data_new)
     }
   }
-
-
-  new_out_data = dplyr::mutate(new_out_data,
-                              Exchange = exchange,
-                              Date = Sys.Date(),
-                              H = lubridate::hour(Sys.time()),
-                              M = lubridate::minute(Sys.time()),
-                              Spread = ASK-BID,
-                              SpreadBID_perc = Spread/BID*100,
-                              SpreadASK_perc = Spread/ASK*100
-  )
-
-  new_out_data <- dplyr::select(new_out_data, Date, H, M, Symbol, Currency, Exchange, BID, ASK, Spread, SpreadBID_perc, SpreadASK_perc)
-
-  return(new_out_data)
+  data_out <- dplyr::mutate(data_out, exchange = exchange, date = Sys.time(), spread = ASK - BID)
+  data_out <- dplyr::select(data_out, date, symbol, currency, exchange, bid = "BID", ask = "ASK", spread)
+  
+  return(data_out)
 }
+
+
+#' Order Book L2 Snapshot
+#' 
+#' Returns latest order book Level 2 data snapshot for the requested exchange.
+#' 
+#' @param api_key Character, mandatory. 
+#' 
+#' @usage 
+#' cc_order_book_L2(api_key = NULL)
+#' 
+#' @details 
+#' It is possible to access to this endpoint with an `api_key`. 
+#' 
+#' @export
+#' 
+#' @rdname cc_order_book_L2
+#' @name cc_order_book_L2
 
 cc_order_book_L2 <- function(api_key = NULL){
+  
+  # Check "api_key" argument 
+  if (missing(api_key) || is.null(api_key)) {
+    if (!quiet) {
+      msg <- paste0('An "api_key" is required to reach this endpoint!')
+      cli::cli_alert_danger(msg)
+      return(NULL)
+    }
+  } 
 
-  if(is.null(api_key)){
-    warning("Need a valid Api Key to reach this endpoint!")
+  # GET call
+  api_paths <- c("data", "v2", "ob", "l2", "snapshot")
+  api_query <- list(limit = 2000, api_key = api_key)
+  response <- cryptocompare_api(path = api_paths, query = api_query)
+  if (response$Response == "Error") {
+    cli::cli_alert_danger(response$Message)
     return(NULL)
   }
-
-  # Path, Query & Response
-  api.paths = c("data", "v2", "ob", "l2", "snapshot")
-
-  api.query = list(limit = 2000, api_key = api_key)
-
-  api.response <- cryptocompare_api(path = api.paths, query = api.query)
-
-  if(api.response$Response == "Error"){
-    warning(api.response$Message)
-    return(NULL)
-  }
-
-  dplyr::bind_cols(
-    dplyr::tibble(
-      Date = Sys.time(),
-      Exchange = api.response$Data$M,
-      Symbol =  api.response$Data$FSYM,
-      Currency = api.response$Data$TSYM
-    ),
-
-    dplyr::tibble(
-      BID_Price = api.response$Data$BID$P,
-      BID_Quantity = api.response$Data$BID$Q
-    ),
-
-    dplyr::tibble(
-      ASK_Price = api.response$Data$ASK$P,
-      ASK_Quantity = api.response$Data$ASK$Q
-    )
-  )
-
+  # Output data
+  data_info <- dplyr::tibble(date = Sys.time(), exchange = response$Data$M, symbol = response$Data$FSYM, currency = response$Data$TSYM)
+  data_bid <- dplyr::tibble(bid_price = response$Data$BID$P, bid_quantity = response$Data$BID$Q)
+  data_ask <- dplyr::tibble(ask_price = response$Data$ASK$P, ask_quantity = response$Data$ASK$Q)
+  data_out <- dplyr::bind_cols(data_info, data_bid, data_ask)
+  
+  return(data_out)
 }
-
-# cc_orderbook_exchange(api_key = "153bc970c37d2a4d8e6735f89d5602b7787f9765e0add94ad960ff91b0326813")
-
-# cc_L1_order_book("BTC", currency = "USDT",exchange = "Binance", api_key = "153bc970c37d2a4d8e6735f89d5602b7787f9765e0add94ad960ff91b0326813" )
-
-# cc_order_book_L2(api_key = "153bc970c37d2a4d8e6735f89d5602b7787f9765e0add94ad960ff91b0326813")

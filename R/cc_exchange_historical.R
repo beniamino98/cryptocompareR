@@ -12,7 +12,7 @@
 #' @return a tibble, with 7 columns (Date, Symbol, Currency, Exchange, VolumeTo, VolumeFrom, Volume)
 #' @export
 
-cc_exchange_historical <- function(symbol = NULL, start = NULL, end = NULL, exchange = NULL, currency = "USD", interval = c("daily", "hourly"), api_key = NULL ){
+cc_exchange_historical <- function(symbol = NULL, start = NULL, end = NULL, exchange = NULL, currency = "USD", interval = c("daily", "hourly"), api_key = NULL){
 
   # Match the Interval
   interval <- match.arg(interval, choices = c("daily", "hourly"))

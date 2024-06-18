@@ -1,4 +1,7 @@
 .Rproj.user
 .Rhistory
 .RData
+.Rbuildignore
 .Ruserdata
+api-tests
+cryptocompareR.Rproj

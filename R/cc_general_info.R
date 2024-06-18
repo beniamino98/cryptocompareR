@@ -1,45 +1,52 @@
-#' @title cryptocompare_api
-#' @name cc_maket_info
-#' @rdname cc_maket_info
+#' Cryptocompare General Info
 #' 
-#' @description Retrieve the general informations, using the cryptocompare Api.
+#' Retrieve the general information, using the cryptocompare Api.
 #' 
-#' @param info  character, the info to be obtained. Without a valid api_key you can access only to the "coins" and "exchanges" endpoints.
-#' Using a free api key, obtained from the website, you can access also to the endpoints:
-#' \itemize{
-#'   \item "blockchain", "cards", "companies", "contracts", "equipment", "gambling", "wallets", and "pools".
-#' }
+#' @param info Character. Without an `api_key` it is possible to access only to `"coins"` and `"exchanges"` information.
+#' Using a free api key, it is possible to access to all the endpoints: 
+#' - `"blockchain"`: returns a list of [all coins](https://min-api.cryptocompare.com/documentation?key=Blockchain&cat=blockchainListOfCoins) for which we currently get blockchain data from IntoTheBlock.
+#' - `"cards"`: returns general info about all the integrated [crypto cards](https://min-api.cryptocompare.com/documentation?key=Other&cat=allCardsStaticInfoEndpoint).
+#' - `"coins"`: returns general info about all the integrated [coins](https://min-api.cryptocompare.com/documentation?key=Other&cat=allCoinsWithContentEndpoint).
+#' - `"companies"`: returns general info about all the integrated [mining companies](https://min-api.cryptocompare.com/documentation?key=Other&cat=allMiningCompaniesStaticInfoEndpoint).
+#' - `"contracts"`: returns general info about all the integrated [mining contracts](https://min-api.cryptocompare.com/documentation?key=Other&cat=allMiningContractsStaticInfoEndpoint).
+#' - `"equipment"`: returns general info about all the integrated [mining equipment](https://min-api.cryptocompare.com/documentation?key=Other&cat=allMiningEquipmentStaticInfoEndpoint). 
+#' - `"exchanges"`: returns general info and 24h volume for all integrated [exchanges](https://min-api.cryptocompare.com/documentation?key=Other&cat=allExchangesStaticInfoEndpoint).
+#' - `"gambling"`: returns general info about all the integrated [exchanges](https://min-api.cryptocompare.com/documentation?key=Other&cat=allGamblingStaticInfoEndpoint).
+#' - `"wallets"`: returns general info about all the integrated [wallets](https://min-api.cryptocompare.com/documentation?key=Other&cat=allWalletsStaticInfoEndpoint).
+#' - `"pools"`: returns general info about all the integrated [mining pools](https://min-api.cryptocompare.com/documentation?key=Other&cat=allMiningPoolsStaticInfoEndpoint). 
 #'
-#' @param currency character, the currency in which convert the monetary values, if present.
-#' @param api_key character, a valid api key from cyptocompare.com.
-#' @param verbose logical, if TRUE it will display warning messages if you do not insert a valid api key for the api-key-only endpoints.
+#' @param currency Character. Currency in which convert the monetary values.
+#' @param api_key Character, optional. Api key from cyptocompare.
+#' @param verbose Logical. If `TRUE` it will display warning messages if you do not insert a valid api key for the api-key-only endpoints.
 #'
-#' @details to be written
-#'
-#' @return a tibble, the dimensions of the output depend on the "info" parameters.
+#' @return a tibble
 #'
 #' @examples
 #' # Endpoints reachable without an Api Key
-#' cc_maket_info("coins")
-#' cc_maket_info("exchanges")
+#' cc_general_info("coins")
+#' cc_general_info("exchanges")
 #'
 #' # Endpoints reachable only with a valid Api Key
+#' \dontrun{
 #' api_key <- "yourapikey"
-#'
-#' cc_maket_info("gambling", api_key = api_key)
-#' cc_maket_info("wallets", api_key = api_key)
-#' cc_maket_info("cards", api_key = api_key)
-#' cc_maket_info("contracts", api_key = api_key)
-#' cc_maket_info("companies", api_key = api_key)
-#' cc_maket_info("equipment", api_key = api_key)
-#' cc_maket_info("pools", api_key = api_key)
-#' cc_maket_info("blockchain", api_key = api_key)
-#'
+#' cc_general_info("gambling", api_key = api_key)
+#' cc_general_info("wallets", api_key = api_key)
+#' cc_general_info("cards", api_key = api_key)
+#' cc_general_info("contracts", api_key = api_key)
+#' cc_general_info("companies", api_key = api_key)
+#' cc_general_info("equipment", api_key = api_key)
+#' cc_general_info("pools", api_key = api_key)
+#' cc_general_info("blockchain", api_key = api_key)
+#' }
 #' @export
+#' 
+#' 
+#' @name cc_general_info
+#' @rdname cc_general_info
 
-cc_maket_info <- function(info = "coins", currency = "USD", api_key = NULL, verbose = FALSE){
+cc_general_info <- function(info = "coins", currency = "USD", api_key = NULL, verbose = FALSE){
 
-  # available paths for general info
+  # Available paths
   general_info <- list(
     blockchain = "blockchain/list",
     cards = "cards/general",
@@ -52,133 +59,98 @@ cc_maket_info <- function(info = "coins", currency = "USD", api_key = NULL, verb
     wallets = "wallets/general",
     pools = "mining/pools/general"
   )
+  path <- match.arg(info, choices = names(general_info))
 
-  # match the path 
-  search_match <- match.arg(info, choices = names(general_info))
-
-  # check if endpoints are different from "coins" or "exchanges" and api_key is NULL
-  if (is.null(api_key) && !search_match %in% c("coins", "exchanges")) {
-
-    if (verbose) {
-      warning("The Endpoint", '"', search_match,'"',  " need a valid Api Key!")
-    }
-    
-    return(NULL)
+  # Api key is required for endpoints different from `coins`/`exchanges`
+  if (!path %in% c("coins", "exchanges")) {
+    # Check "api_key" argument 
+    if (missing(api_key) || is.null(api_key)) {
+      if (!quiet) {
+        msg <- paste0('An "api_key" is required to reach this endpoint!')
+        cli::cli_alert_danger(msg)
+        return(NULL)
+      }
+    } 
   }
 
-  # api path 
-  api_path <- c("data", general_info[[search_match]])
-
-  # api query
-  api_query <- list(tsym = currency, api_key = api_key)
-
-  # GET call
-  response <- cryptocompare_api(path = api_path, query = api_query)$Data
-
-  # function for replacing NULL values with NA's in order to build a tibble
+  # Function to replace `NULL` with `NA` and build a `tibble`
   safe_tibble <- function(x){
-
     x.cond <- purrr::map_lgl(x, is.list)
     x <- x[!x.cond]
     x <- purrr::map(x, ~ifelse(is.null(.x), NA, .x))
-
     dplyr::as_tibble(x)
   }
-
-  # Output Data
+  
+  # GET call
+  api_path <- c("data", general_info[[path]])
+  api_query <- list(tsym = currency, api_key = api_key)
+  response <- cryptocompare_api(path = api_path, query = api_query)$Data
   response <- purrr::map_df(response, safe_tibble)
-
-  # different cleaning on the enpoint 
+  
+  # Output 
   if (info == "coins") {
-    
     response <- dplyr::mutate(response,
                          Algorithm = toupper(Algorithm),
                          Algorithm = stringr::str_trim(Algorithm),
                          ProofType = toupper(ProofType),
-                         ProofType = stringr::str_trim(ProofType)
-    )
+                         ProofType = stringr::str_trim(ProofType))
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", ""), NA_character_, .x))
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::arrange(response, Rank)
     response <- dplyr::select(response, -Url, -ImageUrl, -SortOrder)
     response <- dplyr::filter(response, IsTrading)
-    
   } else if (info == "blockchain") {
-
     response <- dplyr::mutate(response,
                                 From = as.POSIXct(data_available_from, origin = "1970-01-01"),
                                 From = as.Date(From))
     response <- dplyr::select(response, -data_available_from)
     response <- dplyr::arrange(response, From)
-
   } else if (info == "exchanges") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
-    response <- dplyr::select(response,
-                                -Url, -LogoUrl, -SortOrder, -ItemType,
-                                -Description, -Fees, -DepositMethods, -WithdrawalMethods,
-                                -Sponsored, -Recommended )
+    response <- dplyr::select(response, 
+                              -Url, -LogoUrl, -SortOrder, -ItemType, 
+                              -Description, -Fees, -DepositMethods, -WithdrawalMethods, 
+                              -Sponsored, -Recommended)
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   }  else if (info == "gambling") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -BettingLimits)
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "wallets") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, 
                               -IsUsingOurApi, -HasVouchersAndOffers, -WalletFeatures)
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "cards") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended)
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "contracts") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended, -CurrenciesAvailableLogo )
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "companies") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "pools") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   } else if (info == "equipment") {
-
     response <- dplyr::mutate(response, Rank = as.integer(SortOrder))
     response <- dplyr::select(response, -Url, -LogoUrl, -SortOrder, -Sponsored, -Recommended )
     response <- dplyr::mutate_if(response, is.character, ~ifelse(.x %in% c("N/A", "", "-"), NA_character_, stringr::str_trim(.x)))
     response <- dplyr::arrange(response, Rank)
-
   }
-
+  
   return(response)
-
 }
-
-
-
-
-
 

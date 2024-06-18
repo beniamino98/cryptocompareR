@@ -4,12 +4,12 @@
 \alias{cc_blockchain_balance}
 \title{cc_blockchain_balance}
 \usage{
-cc_blockchain_balance(start = NULL, end = NULL, api_key = NULL)
+cc_blockchain_balance(from = NULL, to = NULL, api_key = NULL)
 }
 \arguments{
-\item{start}{character or Date, the start date for importation.}
+\item{from}{character or Date, the start date for importation.}
 
-\item{end}{character or Date, the end date for importation.}
+\item{to}{character or Date, the end date for importation.}
 
 \item{api_key}{character}
 }
@@ -34,9 +34,10 @@ The output of the function will be a tibble with 6 columns:
 \examples{
 
 # Api key is required
+\dontrun{
 yourapikey <- "yourapikey"
-cc_blockchain_balance(start = "2017-01-01",
-                      end = "2023-01-01",
+cc_blockchain_balance(from = "2017-01-01",
+                      to = "2023-01-01",
                       api_key = yourapikey)
-
+}
 }

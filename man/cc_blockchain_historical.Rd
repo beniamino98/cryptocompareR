@@ -21,7 +21,7 @@ cc_blockchain_historical(
 \item{api_key}{character}
 }
 \value{
-A \code{tibble} object.
+A \code{tibble}.
 }
 \description{
 Blockchain historical data, such as the number of transactions, active wallets or mining rewards are difficult to retrieve in a readable format. Cryptocompare simplify
@@ -29,9 +29,8 @@ substantially the procedure of download, aggregate and summaries the data for ea
 The data available for the Bitcoin's blockchain starts from 2017. In order to access to this function a \verb{free api key is needed}.
 }
 \examples{
-
 # Api key is required
-
+\dontrun{
 yourapikey <- "yourapikey"
 
 cc_blockchain_historical(symbol = "BTC", start = "2017-01-01",
@@ -42,5 +41,5 @@ cc_blockchain_historical(symbol = "ETH", start = "2017-01-01",
 
 cc_blockchain_historical(symbol = "DOGE", start = "2017-01-01",
                          end = "2023-01-01", api_key = yourapikey)
-
+}
 }

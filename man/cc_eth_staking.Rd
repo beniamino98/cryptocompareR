@@ -2,7 +2,7 @@
 % Please edit documentation in R/cc_eth_staking.R
 \name{cc_eth_staking}
 \alias{cc_eth_staking}
-\title{cc_eth_staking}
+\title{Staking Rate Historical Day}
 \usage{
 cc_eth_staking(start = NULL, end = NULL, api_key = NULL)
 }
@@ -17,16 +17,22 @@ cc_eth_staking(start = NULL, end = NULL, api_key = NULL)
 tibble
 }
 \description{
-Ethereum staking interest rate, from when the Beacon chain was active. In order to access to this endpoint a \verb{free api key is needed}.
+Ethereum staking interest rate, from when the Beacon chain was active.
+}
+\details{
+The Ether staking rate is powered by Attestant, a company dedicated to the business of staking.
+They provide a non-custodial Ethereum 2 managed staking service, giving customers the ability to stake
+their Ether using Attestant’s infrastructure while always retaining full control of their assets.
+You can only use this endpoint with a valid api_key.
+The Ether rate is generally updated daily at 11:00 am UTC for the previous day.
 }
 \examples{
-
 # Api key is required
-
+\dontrun{
 yourapikey <- "yourapikey"
-
 cc_eth_staking(start = "2022-01-01", end = "2023-01-01", api_key = yourapikey)
 cc_eth_staking(start = "2021-01-01", end = "2022-01-01", api_key = yourapikey)
 cc_eth_staking(start = "2023-01-01", end = "2023-01-19", api_key = yourapikey)
+}
 
 }

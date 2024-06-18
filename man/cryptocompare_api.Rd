@@ -2,52 +2,25 @@
 % Please edit documentation in R/cryptocompare_api.R
 \name{cryptocompare_api}
 \alias{cryptocompare_api}
-\title{cryptocompare_api}
+\title{GET call to cryptocompare API}
 \usage{
-cryptocompare_api(
-  path = NULL,
-  query = NULL,
-  config = list(),
-  type = "text",
-  encoding = "UTF-8",
-  tojson = TRUE
-)
+cryptocompare_api(path = NULL, query = NULL, config = list())
 }
 \arguments{
-\item{path}{vector, path for the construction of the link (see the official api documentation)}
+\item{path}{Character vector. API path, \code{NULL} or \code{NA} elements will be excluded.}
 
-\item{query}{list, query for the construction of the link (see official api documentation), the names of each component of the list is the name of the Api argument while the element is the argument itself.}
+\item{query}{Named list. Query parameters for the API call, \code{NULL} or \code{NA} elements will be excluded.}
 
-\item{config}{configuration parameter \code{config} from the function \code{\link[httr]{GET}}.}
-
-\item{type}{character, see the documentation of \code{\link[httr]{content}}.}
-
-\item{encoding}{character, see the documentation of \code{\link[httr]{content}}.}
-
-\item{tojson}{logical, if TRUE the response will be converted from json.
-\itemize{
-\item \code{type = "raw"} will return a raw vector.
-\item \code{type = "text"}, will return a character vector of length 1. The character vector is always re-encoded to UTF-8.
-If this encoding fails (usually because the page declares an incorrect encoding), \code{content()} will return NA.
-\item \code{type = "auto"}, will return a parsed R object.
-}}
+\item{config}{Configuration parameter \code{config}. See the function \code{\link[httr]{GET}}.}
 }
 \description{
-Function to execute a call to the cryptocompare Api. It will automatically detect if some errors has occurred, in that case the function will return NULL.
-It is build using the \code{httr} functions.
+Execute a GET call to cryptocompare API.
 }
 \examples{
-api_paths = c("data", "exchange", "histoday")
-api_query = list(tsym = "USD",
-                  e = "Binance",
-                  toTs = as_unix("2023-01-01"),
-                  limit = 2000, api_key = NULL)
-
-cryptocompare_api(path = api_paths,
-                  query = api_query,
-                  config = list(),
-                  type = "text",
-                  encoding = "UTF-8",
-                  tojson = TRUE)
+api_path = c("data", "exchange", "histoday")
+api_query = list(tsym = "USD", e = "Binance",
+                 toTs = as_unix("2023-01-01"),
+                 limit = 2000, api_key = NULL)
+cryptocompare_api(path = api_path, query = api_query)
 
 }

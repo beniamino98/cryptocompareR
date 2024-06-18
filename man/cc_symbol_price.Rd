@@ -2,39 +2,53 @@
 % Please edit documentation in R/cc_symbol_price.R
 \name{cc_symbol_price}
 \alias{cc_symbol_price}
-\title{cc_symbol_price}
+\title{Symbols Price}
 \usage{
-cc_symbol_price(
-  symbol = NULL,
-  exchange = NULL,
-  currency = "USD",
-  api_key = NULL
-)
+cc_symbol_price(symbol = NULL, 
+                exchange = NULL, 
+                currency = "USD", 
+                api_key = NULL)
 }
 \arguments{
-\item{symbol}{A string or character vector containing the symbols of interest. (e.g. "BTC", "ETH", "BNB",...)}
+\item{symbol}{Character vector. The cryptocurrency symbol of interest, e.g. \code{"BTC"}, \code{"ETH"}, \code{"BNB"}.
+Default is \code{NULL}.}
 
-\item{exchange}{A string or character vector containing the exchange to use, if NULL it will be returned a mean between all the exchanges and denoted with "global".}
+\item{currency}{Character vector. Currency symbols to convert into, e.g. \code{"USD"}, \code{"USDT"}, \code{"BNB"}, \code{"EUR"}.
+If \code{NULL}, the default, will be used \code{"USD"}.}
 
-\item{currency}{A string or character vector containing the currency in which convert the output (e.g. "USD", "USDT", "BNB", "EUR",...).}
+\item{exchange}{Character vector. The exchange to obtain data from.
+If \code{NULL}, the default, will be returned a global mean between all the exchanges.}
 
 \item{api_key}{character}
+
+\item{quiet}{Logical. Default is \code{FALSE}. If \code{TRUE} suppress messages and warnings.}
 }
 \value{
-Return a \code{tibble} object.
+Return a \code{tibble}. The number of columns will depends on the lenght of \code{currency} parameter.
+There are 3 columns always present:
+\itemize{
+\item \code{date}: \code{\link[=POSIXt-class]{POSIXt}}, time of the snapshot.
+\item \code{exchange}: Character, reference exchange. If \code{exchange} is \code{NULL} will be classified as \code{Global}.
+\item \code{symbol}: Character, tcryptocurrency symbol of interest.
+}
 }
 \description{
-function for obtaining the last price for a symbol or a vector of symbols.
+Get the current price of any cryptocurrency in any other currency that you need.
+}
+\details{
+If the crypto does not trade directly into the \code{symbol} requested, \code{BTC} will be used for conversion.
+If the opposite pair trades we invert it, e.g. BTC-XMR.
 }
 \examples{
-# Mean Price for the Pair BTC-USD between the exchanges
+# Mean price for BTCUSD between all the exchanges
 cc_symbol_price(symbol = "BTC", exchange = NULL, currency = "USD")
 
-# Mean Price for the Pair BTC-USD and ETH-USD between the exchanges
+# Mean price for BTCUSD and ETHUSD between all the exchanges
 cc_symbol_price(symbol = c("BTC", "ETH"), exchange = NULL, currency = "USD")
 
-# Price for the Pair BTC-USDT, ETH-USDT, BTC-BUSD, ETH-BUSD on Binance
+# Mean price for BTCUSDT, ETHUSDT on Binance
 cc_symbol_price(symbol = c("BTC", "ETH"),
                 exchange = "Binance",
-                currency = c("USDT", "BUSD"))
+                currency = c("USDT"))
+                
 }

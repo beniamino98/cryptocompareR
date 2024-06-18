@@ -43,33 +43,25 @@ cc_price_historical <- function(symbol, start = NULL, end = NULL, exchange = NUL
   }
 
   # Default Start Date
-  if(is.null(start)){
+  if (is.null(start)) {
     start_date <- as.POSIXct("2010-01-01 12:00:00 CEST")
   } else {
     start_date <- start
   }
 
   # Conversion and Default Values depending on the "interval"
-  if(interval == "daily"){
-
+  if (interval == "daily") {
     end_date <- as.Date(end_date)
     start_date <- as.Date(start)
-
-  } else if(interval == "hourly"){
-
+  } else if (interval == "hourly") {
     end_date <- as.POSIXct(end_date, start = "1970-01-01")
     start_date <- as.POSIXct(start_date, start = "1970-01-01")
-
-  } else if(interval == "minutely" & is.null(api_key)) {
-
+  } else if (interval == "minutely" & is.null(api_key)) {
     end_date <- Sys.time()
     start_date <- end_date - 7*23*60*60
-
   } else {
-
     end_date <- as.POSIXct(end_date, start = "1970-01-01")
     start_date <- as.POSIXct(start_date, start = "1970-01-01")
-
   }
 
   # Loop to get all the data
@@ -80,17 +72,18 @@ cc_price_historical <- function(symbol, start = NULL, end = NULL, exchange = NUL
 
     # save function to avoid interruptions if an error occur
     safe_import <- purrr::safely(cc_api_price_historical)
-
-    historical_data[[i]] <- safe_import(symbol = symbol, end = last_date, exchange = exchange, currency = currency, interval = interval, api_key = api_key)$result
-
+    historical_data[[i]] <- safe_import(symbol = symbol, end = last_date, exchange = exchange, 
+                                        currency = currency, interval = interval, api_key = api_key)$result
+    
     # Control for Minutely Data:
     if(purrr::is_empty(historical_data)){
 
       if(interval == "minutely"){
-
         warn_msg <- "Your Api Key allow just for the last 7 days for minutely data!\nConsider to upgrade your plan visiting: https://min-api.cryptocompare.com/pricing"
 
-        if (verbose) warning(warn_msg)
+        if (verbose) {
+          warning(warn_msg)
+        }
 
         end_date <- Sys.time()
         start_date <- end_date - 7*23*60*60
@@ -104,7 +97,7 @@ cc_price_historical <- function(symbol, start = NULL, end = NULL, exchange = NUL
 
     # update the last date
     last_date = historical_data[[i]]$Date[1]
-    i = i + 1
+    i <- i + 1
   }
 
   # Create the dataset
@@ -117,9 +110,7 @@ cc_price_historical <- function(symbol, start = NULL, end = NULL, exchange = NUL
 
   # convert in Date if daily
   if(interval == "daily"){
-
     historical_data$Date <- as.Date(historical_data$Date)
-
   }
 
   return(historical_data)
@@ -195,9 +186,4 @@ cc_api_price_historical <- function(symbol = NULL, end = NULL, exchange = NULL, 
   return(api_response)
 
 }
-
-
-
-
-
 

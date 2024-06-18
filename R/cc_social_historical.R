@@ -133,4 +133,3 @@ cc_api_social_historical <- function(coinId = NULL, end = NULL,  interval = c("d
   return(api.response)
 
 }
-
